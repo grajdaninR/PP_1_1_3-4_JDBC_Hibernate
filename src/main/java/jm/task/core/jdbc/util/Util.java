@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+//в настройках подключения отключи автокоммит и в каждом методе сделай коммит и ролбэк
 public class Util {
     private static Logger log = Logger.getLogger(Util.class.getName());
 
@@ -21,10 +21,19 @@ public class Util {
     public static  Connection getConnection() {
         if(dbConnect == null) {
             try {
+                if (dbConnect != null) {
+                    dbConnect.setAutoCommit(false);
+                }
                 return dbConnect = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
             } catch (SQLException e) {
                 log.log(Level.SEVERE, "Creation connection with DB failed",e);
-                e.printStackTrace();
+                return null;
+            } finally {
+                try {
+                    dbConnect.setAutoCommit(false);
+                } catch (SQLException e) {
+                    log.log(Level.SEVERE,"Setting setAutoCommit(false) is field", e);
+                }
             }
         }
         return dbConnect;

@@ -22,21 +22,35 @@ public class UserDaoJDBCImpl implements UserDao {
         try (Statement state = connection.createStatement()) {
             state.execute("CREATE TABLE IF NOT EXISTS  users(id integer not null primary key unique auto_increment," +
                     " name varchar(50), lastName varchar(50), age smallint) CHARACTER SET = utf8 , COLLATE = utf8_general_ci");
+            connection.commit();
         } catch (SQLException e) {
             log.log(Level.SEVERE,"Creation of DB is failed", e);
-            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
     public void dropUsersTable() {
         try(Statement state = connection.createStatement()) {
             state.executeUpdate("DROP TABLE IF EXISTS users");
+            connection.commit();
         } catch (SQLException e){
             log.log(Level.SEVERE,"Dropping of DB is filed", e);
-            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
-
-
     }
 
     public void saveUser(String name, String lastName, byte age) {
@@ -55,10 +69,19 @@ public class UserDaoJDBCImpl implements UserDao {
             String usName = reSet.getString("name");
             String usLastName = reSet.getString("lastName");
             System.out.println("User с именем "+ usName + " "+ usLastName + " добавлен в базу");
+            connection.commit();
         }
 
     } catch (SQLException e){
         log.log(Level.SEVERE,"Saving of user to DB is filed",e);
+        if (connection != null) {
+            try {
+                System.err.print("Transaction is being rolled back\n");
+                connection.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
       }
     }
 
@@ -68,9 +91,17 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement PreState = connection.prepareStatement("DELETE FROM users WHERE id =?")) {
             PreState.setInt(1, (int) id);
             PreState.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
             log.log(Level.SEVERE,"Remove of user to DB is filed");
-            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
 
     }
@@ -88,20 +119,35 @@ public class UserDaoJDBCImpl implements UserDao {
 
             allUsers.add(new User(id,name,lastName,age));
             }
+            connection.commit();
         } catch (SQLException e) {
             log.log(Level.SEVERE,"Getting of all users from DB is filed");
-            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
-
         return allUsers;
     }
 
     public void cleanUsersTable() {
         try (Statement state = connection.createStatement()) {
             state.executeUpdate("DELETE FROM users");
+            connection.commit();
         } catch (SQLException e) {
             log.log(Level.SEVERE,"Cleaning of DB \"users\" is filed",e);
-            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
 
     }
